@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Patrimonio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2234;
+    --border: #1f2d45;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --gold: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    padding: 28px 40px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+
+  .last-update {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .refresh-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .refresh-btn:hover { opacity: 0.85; }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* MAIN */
+  main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* TOTAL PATRIMONIO */
+  .hero {
+    margin-bottom: 32px;
+  }
+  .hero-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .hero-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .hero-value-eur {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -1px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .hero-rate {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .hero-sub {
+    display: flex;
+    gap: 24px;
+    margin-top: 12px;
+    align-items: center;
+  }
+  .hero-pnl {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .hero-pnl.pos { color: var(--green); }
+  .hero-pnl.neg { color: var(--red); }
+  .hero-cost {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* SUMMARY CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card.stocks::before { background: var(--accent); }
+  .card.crypto::before { background: var(--gold); }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .card-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .card-pnl {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .card-pnl.pos { color: var(--green); }
+  .card-pnl.neg { color: var(--red); }
+  .card-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* SECTIONS */
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.blue { background: var(--accent); }
+  .dot.gold { background: var(--gold); }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+
+  td {
+    padding: 13px 16px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  td:first-child { text-align: left; }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  .ticker {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .company-name {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .pnl-pos { color: var(--green); font-weight: 600; }
+  .pnl-neg { color: var(--red); font-weight: 600; }
+
+  /* LOADING / ERROR */
+  .loading {
+    text-align: center;
+    padding: 60px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* ALLOCATION BAR */
+  .alloc-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    margin-top: 20px;
+    overflow: hidden;
+    display: flex;
+  }
+  .alloc-seg {
+    height: 100%;
+    transition: width 0.6s ease;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    header { padding: 20px; }
+    main { padding: 20px; }
+    .hero-value { font-size: 36px; }
+    th, td { padding: 10px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">mi<span>patrimonio</span></div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <span class="last-update" id="lastUpdate">—</span>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ Actualizar</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">Patrimonio total</div>
+    <div class="hero-value" id="heroValueUSD">—</div>
+    <div class="hero-value-eur" id="heroValueEUR">—</div>
+    <div class="hero-rate" id="heroRate">—</div>
+    <div class="hero-sub">
+      <span class="hero-pnl" id="heroPnl">—</span>
+      <span class="hero-cost" id="heroCost">—</span>
+    </div>
+    <div class="alloc-bar" id="allocBar"></div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="cards" id="summaryCards">
+    <div class="card stocks">
+      <div class="card-label">📈 Acciones</div>
+      <div class="card-value" id="cardStocksVal">—</div>
+      <div class="card-pnl" id="cardStocksPnl">—</div>
+      <div class="card-sub" id="cardStocksCost">—</div>
+    </div>
+    <div class="card crypto">
+      <div class="card-label">₿ Cripto</div>
+      <div class="card-value" id="cardCryptoVal">—</div>
+      <div class="card-pnl" id="cardCryptoPnl">—</div>
+      <div class="card-sub" id="cardCryptoCost">—</div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-msg" id="errorMsg" style="display:none;"></div>
+
+  <!-- ACCIONES TABLE -->
+  <div class="section-title"><span class="dot blue"></span> Acciones americanas</div>
+  <div class="table-wrap">
+    <div class="loading" id="stocksLoading"><div class="spinner"></div>Cargando precios...</div>
+    <table id="stocksTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Acciones</th>
+          <th>Precio medio compra</th>
+          <th>Precio actual</th>
+          <th>Valor actual (€)</th>
+          <th>Coste total (€)</th>
+          <th>P&L (€)</th>
+          <th>Rentabilidad</th>
+        </tr>
+      </thead>
+      <tbody id="stocksBody"></tbody>
+    </table>
+  </div>
+
+  <!-- CRIPTO TABLE -->
+  <div class="section-title"><span class="dot gold"></span> Criptomonedas</div>
+  <div class="table-wrap">
+    <div class="loading" id="cryptoLoading"><div class="spinner"></div>Cargando precios...</div>
+    <table id="cryptoTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Activo</th>
+          <th>Unidades</th>
+          <th>Precio actual (€)</th>
+          <th>Valor actual (€)</th>
+          <th>Coste total (€)</th>
+          <th>P&L (€)</th>
+          <th>Rentabilidad</th>
+        </tr>
+      </thead>
+      <tbody id="cryptoBody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const SHEET_ID = '1umyak1XL3cB6q44B0V2EC6w9BFpIGjr_N7aHWl55FdA';
+const SHEET_ACCIONES = 'Acciones';
+const SHEET_CRIPTO = 'Cripto';
+
+// ─── HELPERS ──────────────────────────────────────────────
+const fmt = (n, decimals=2) => new Intl.NumberFormat('es-ES', {
+  minimumFractionDigits: decimals,
+  maximumFractionDigits: decimals
+}).format(n);
+
+const fmtEur = (n) => fmt(n) + ' €';
+const fmtPct = (n) => (n >= 0 ? '+' : '') + fmt(n) + '%';
+
+function pnlClass(n) { return n >= 0 ? 'pnl-pos' : 'pnl-neg'; }
+
+function serialToDate(serial) {
+  // Excel serial date to JS
+  const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+  return d;
+}
+
+// ─── FETCH GOOGLE SHEET ───────────────────────────────────
+async function fetchSheet(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  return json.table;
+}
+
+// ─── FETCH EUR/USD ────────────────────────────────────────
+async function fetchEURUSD() {
+  try {
+    const res = await fetch('/.netlify/functions/precios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'eurusd' })
+    });
+    const data = await res.json();
+    return data?.rate || 1.08;
+  } catch(e) {
+    return 1.08;
+  }
+}
+
+// ─── FETCH STOCK PRICES ───────────────────────────────────
+async function fetchStockPrices(tickers) {
+  try {
+    const res = await fetch('/.netlify/functions/precios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'stocks', tickers })
+    });
+    const data = await res.json();
+    return data?.prices || {};
+  } catch(e) {
+    console.warn('Stock fetch failed', e);
+    return {};
+  }
+}
+
+// ─── FETCH CRYPTO PRICES ──────────────────────────────────
+async function fetchCryptoPrices() {
+  try {
+    const res = await fetch('/.netlify/functions/precios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'crypto' })
+    });
+    const data = await res.json();
+    return data || {};
+  } catch(e) {
+    return {};
+  }
+}
+
+// ─── PARSE ACCIONES SHEET ────────────────────────────────
+function parseAcciones(table) {
+  // rows: Empresa, Ticker, Fecha, Nº Acciones, Precio Compra $, Corrector, Coste €, Notas
+  // Skip row 0 (title) and row 1 (header) — Google Sheets GViz includes the merged title row
+  const map = {};
+  for (const row of table.rows) {
+    const cells = row.c;
+    if (!cells) continue;
+    const empresaVal = cells[0]?.v;
+    if (!empresaVal) continue;
+    const empresa = String(empresaVal).trim();
+    // Skip header/title rows
+    if (empresa === 'Empresa' || empresa.includes('PATRIMONIO')) continue;
+
+    const ticker = cells[1]?.v ? String(cells[1].v).trim().toUpperCase() : empresa;
+    const numAcc = parseFloat(cells[3]?.v) || 0;
+    const precioUSD = parseFloat(cells[4]?.v) || 0;
+    const corrector = parseFloat(cells[5]?.v) || 1.08;
+    const costeEur = parseFloat(cells[6]?.v) || (numAcc * precioUSD / corrector);
+
+    if (numAcc <= 0) continue;
+
+    if (!map[ticker]) {
+      map[ticker] = { empresa, ticker, totalAcciones: 0, totalCosteUSD: 0, totalCosteEur: 0, correctorSum: 0, ops: 0 };
+    }
+    map[ticker].totalAcciones += numAcc;
+    map[ticker].totalCosteUSD += numAcc * precioUSD;
+    map[ticker].totalCosteEur += costeEur;
+    map[ticker].correctorSum += corrector;
+    map[ticker].ops += 1;
+  }
+  for (const t of Object.values(map)) {
+    t.precioMedioUSD = t.totalAcciones > 0 ? t.totalCosteUSD / t.totalAcciones : 0;
+    t.correctorPromedio = t.ops > 0 ? t.correctorSum / t.ops : 1.08;
+  }
+  return Object.values(map);
+}
+
+// ─── PARSE CRIPTO SHEET ───────────────────────────────────
+function parseCripto(table) {
+  const map = {};
+  for (const row of table.rows) {
+    const cells = row.c;
+    if (!cells) continue;
+    const symbolVal = cells[0]?.v;
+    if (!symbolVal) continue;
+    const symbol = String(symbolVal).trim().toUpperCase();
+    if (symbol === 'CRIPTO' || symbol.includes('PATRIMONIO')) continue;
+
+    let unidades = 0;
+    const rawU = cells[2]?.v;
+    if (rawU !== null && rawU !== undefined) {
+      if (typeof rawU === 'number') {
+        unidades = rawU;
+      } else {
+        // Handle Spanish comma decimals (0,80751179) and scientific notation (2.51966E-3)
+        unidades = parseFloat(String(rawU).replace(',', '.'));
+      }
+    }
+    const coste = parseFloat(cells[3]?.v) || 0;
+    if (!unidades || unidades <= 0) continue;
+
+    if (!map[symbol]) map[symbol] = { symbol, totalUnidades: 0, totalCoste: 0 };
+    map[symbol].totalUnidades += unidades;
+    map[symbol].totalCoste += coste;
+  }
+  return Object.values(map);
+}
+
+
+
+// ─── RENDER STOCKS ───────────────────────────────────────
+function renderStocks(posiciones, prices, eurusd) {
+  const tbody = document.getElementById('stocksBody');
+  tbody.innerHTML = '';
+  let totalValor = 0, totalCoste = 0;
+
+  const sorted = [...posiciones].sort((a,b) => {
+    const va = (prices[a.ticker] || 0) * a.totalAcciones / eurusd;
+    const vb = (prices[b.ticker] || 0) * b.totalAcciones / eurusd;
+    return vb - va;
+  });
+
+  for (const pos of sorted) {
+    const precioActual = prices[pos.ticker];
+    const row = document.createElement('tr');
+
+    if (!precioActual) {
+      row.innerHTML = `
+        <td><span class="ticker">${pos.ticker}</span><span class="company-name">${pos.empresa}</span></td>
+        <td>${fmt(pos.totalAcciones, 0)}</td>
+        <td>$${fmt(pos.precioMedioUSD)}</td>
+        <td style="color:var(--muted)">Sin precio</td>
+        <td>—</td>
+        <td>${fmtEur(pos.totalCosteEur)}</td>
+        <td>—</td>
+        <td>—</td>`;
+      tbody.appendChild(row);
+      totalCoste += pos.totalCosteEur;
+      continue;
+    }
+
+    const valorActualEur = pos.totalAcciones * precioActual / eurusd;
+    const pnl = valorActualEur - pos.totalCosteEur;
+    const pct = pos.totalCosteEur > 0 ? (pnl / pos.totalCosteEur) * 100 : 0;
+    totalValor += valorActualEur;
+    totalCoste += pos.totalCosteEur;
+
+    row.innerHTML = `
+      <td><span class="ticker">${pos.ticker}</span><span class="company-name">${pos.empresa}</span></td>
+      <td>${fmt(pos.totalAcciones, 0)}</td>
+      <td>$${fmt(pos.precioMedioUSD)}</td>
+      <td>$${fmt(precioActual)}</td>
+      <td>${fmtEur(valorActualEur)}</td>
+      <td>${fmtEur(pos.totalCosteEur)}</td>
+      <td class="${pnlClass(pnl)}">${pnl >= 0 ? '+' : ''}${fmtEur(pnl)}</td>
+      <td class="${pnlClass(pct)}">${fmtPct(pct)}</td>`;
+    tbody.appendChild(row);
+  }
+
+  document.getElementById('stocksLoading').style.display = 'none';
+  document.getElementById('stocksTable').style.display = 'table';
+
+  // Update card
+  const pnl = totalValor - totalCoste;
+  const pct = totalCoste > 0 ? (pnl / totalCoste) * 100 : 0;
+  document.getElementById('cardStocksVal').textContent = fmtEur(totalValor);
+  const pnlEl = document.getElementById('cardStocksPnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmtEur(pnl) + ' (' + fmtPct(pct) + ')';
+  pnlEl.className = 'card-pnl ' + (pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('cardStocksCost').textContent = 'Invertido: ' + fmtEur(totalCoste);
+
+  return { valor: totalValor, coste: totalCoste };
+}
+
+// ─── RENDER CRYPTO ───────────────────────────────────────
+function renderCrypto(posiciones, prices) {
+  const tbody = document.getElementById('cryptoBody');
+  tbody.innerHTML = '';
+  let totalValor = 0, totalCoste = 0;
+
+  for (const pos of posiciones) {
+    const precioActual = prices[pos.symbol];
+    const row = document.createElement('tr');
+
+    if (!precioActual) {
+      row.innerHTML = `
+        <td><span class="ticker">${pos.symbol}</span></td>
+        <td>${pos.totalUnidades.toFixed(8)}</td>
+        <td style="color:var(--muted)">Sin precio</td>
+        <td>—</td>
+        <td>${fmtEur(pos.totalCoste)}</td>
+        <td>—</td>
+        <td>—</td>`;
+      tbody.appendChild(row);
+      totalCoste += pos.totalCoste;
+      continue;
+    }
+
+    const valorActual = pos.totalUnidades * precioActual;
+    const pnl = valorActual - pos.totalCoste;
+    const pct = pos.totalCoste > 0 ? (pnl / pos.totalCoste) * 100 : 0;
+    totalValor += valorActual;
+    totalCoste += pos.totalCoste;
+
+    row.innerHTML = `
+      <td><span class="ticker">${pos.symbol}</span></td>
+      <td>${pos.totalUnidades.toFixed(6)}</td>
+      <td>${fmtEur(precioActual)}</td>
+      <td>${fmtEur(valorActual)}</td>
+      <td>${fmtEur(pos.totalCoste)}</td>
+      <td class="${pnlClass(pnl)}">${pnl >= 0 ? '+' : ''}${fmtEur(pnl)}</td>
+      <td class="${pnlClass(pct)}">${fmtPct(pct)}</td>`;
+    tbody.appendChild(row);
+  }
+
+  document.getElementById('cryptoLoading').style.display = 'none';
+  document.getElementById('cryptoTable').style.display = 'table';
+
+  const pnl = totalValor - totalCoste;
+  const pct = totalCoste > 0 ? (pnl / totalCoste) * 100 : 0;
+  document.getElementById('cardCryptoVal').textContent = fmtEur(totalValor);
+  const pnlEl = document.getElementById('cardCryptoPnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmtEur(pnl) + ' (' + fmtPct(pct) + ')';
+  pnlEl.className = 'card-pnl ' + (pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('cardCryptoCost').textContent = 'Invertido: ' + fmtEur(totalCoste);
+
+  return { valor: totalValor, coste: totalCoste };
+}
+
+// ─── RENDER HERO ─────────────────────────────────────────
+function renderHero(stocks, crypto, eurusd) {
+  const totalValorEUR = stocks.valor + crypto.valor;
+  const totalValorUSD = totalValorEUR * eurusd;
+  const totalCoste = stocks.coste + crypto.coste;
+  const pnl = totalValorEUR - totalCoste;
+  const pct = totalCoste > 0 ? (pnl / totalCoste) * 100 : 0;
+
+  document.getElementById('heroValueUSD').textContent = '$' + fmt(totalValorUSD);
+  document.getElementById('heroValueEUR').textContent = fmtEur(totalValorEUR);
+  document.getElementById('heroRate').textContent = `1 € = $${fmt(eurusd, 4)}`;
+
+  const pnlEl = document.getElementById('heroPnl');
+  pnlEl.textContent = (pnl >= 0 ? '▲ +' : '▼ ') + fmtEur(Math.abs(pnl)) + '  (' + fmtPct(pct) + ')';
+  pnlEl.className = 'hero-pnl ' + (pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('heroCost').textContent = 'Invertido en total: ' + fmtEur(totalCoste);
+
+  // Allocation bar
+  const bar = document.getElementById('allocBar');
+  const stocksPct = totalValorEUR > 0 ? (stocks.valor / totalValorEUR * 100) : 50;
+  bar.innerHTML = `
+    <div class="alloc-seg" style="width:${stocksPct}%;background:var(--accent);"></div>
+    <div class="alloc-seg" style="width:${100-stocksPct}%;background:var(--gold);"></div>`;
+}
+
+// ─── MAIN LOAD ───────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.textContent = '↻ Actualizando...';
+  document.getElementById('errorMsg').style.display = 'none';
+
+  // Reset loaders
+  document.getElementById('stocksLoading').style.display = 'block';
+  document.getElementById('stocksTable').style.display = 'none';
+  document.getElementById('cryptoLoading').style.display = 'block';
+  document.getElementById('cryptoTable').style.display = 'none';
+
+  try {
+    // 1. Fetch sheets
+    const [accionesTable, criptoTable] = await Promise.all([
+      fetchSheet(SHEET_ACCIONES),
+      fetchSheet(SHEET_CRIPTO),
+    ]);
+
+    // 2. Parse
+    const acciones = parseAcciones(accionesTable);
+    const cripto = parseCripto(criptoTable);
+
+    // 3. Get tickers
+    const tickers = [...new Set(acciones.map(a => a.ticker))];
+
+    // 4. Fetch prices in parallel
+    const [stockPrices, cryptoPrices, eurusd] = await Promise.all([
+      fetchStockPrices(tickers),
+      fetchCryptoPrices(),
+      fetchEURUSD(),
+    ]);
+
+    // 5. Render
+    const stocksResult = renderStocks(acciones, stockPrices, eurusd);
+    const cryptoResult = renderCrypto(cripto, cryptoPrices);
+    renderHero(stocksResult, cryptoResult, eurusd);
+
+    // 6. Update timestamp
+    document.getElementById('lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+
+  } catch(e) {
+    console.error(e);
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠️ Error al cargar los datos: ' + e.message + '. Comprueba que el Google Sheet es público.';
+    document.getElementById('stocksLoading').style.display = 'none';
+    document.getElementById('cryptoLoading').style.display = 'none';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '↻ Actualizar';
+}
+
+// Auto-load on start
+loadAll();
+</script>
+</body>
+</html>

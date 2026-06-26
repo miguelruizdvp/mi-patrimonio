@@ -1,11 +1,5 @@
 const AV_KEY = 'WIEAH86G93CDC6DD';
 
-const fetchWithTimeout = (url, ms = 5000) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ms);
-  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timeout));
-};
-
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -18,7 +12,7 @@ exports.handler = async (event) => {
 
     // ── TIPO DE CAMBIO EUR/USD ──
     if (type === 'eurusd') {
-      const res = await fetchWithTimeout(
+      const res = await fetch(
         `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=EUR&to_currency=USD&apikey=${AV_KEY}`
       );
       const data = await res.json();
@@ -30,29 +24,23 @@ exports.handler = async (event) => {
       };
     }
 
-    // ── PRECIOS DE ACCIONES ──
-    // Use batch endpoint to get all prices in ONE call
+    // ── PRECIOS DE ACCIONES — un solo batch call ──
     if (type === 'stocks' && tickers?.length) {
       const prices = {};
+      const symbols = tickers.join(',');
 
-      // Process sequentially, 2 at a time, with short delay
-      const delay = (ms) => new Promise(r => setTimeout(r, ms));
-      
-      for (let i = 0; i < tickers.length; i++) {
-        const ticker = tickers[i];
-        try {
-          const res = await fetchWithTimeout(
-            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${AV_KEY}`,
-            4000
-          );
-          const data = await res.json();
-          const price = parseFloat(data?.['Global Quote']?.['05. price']);
-          if (price > 0) prices[ticker] = price;
-        } catch(e) {
-          console.warn('Failed for', ticker);
+      const res = await fetch(
+        `https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=${symbols}&apikey=${AV_KEY}`
+      );
+      const data = await res.json();
+      const quotes = data?.['Stock Quotes'];
+
+      if (Array.isArray(quotes)) {
+        for (const q of quotes) {
+          const ticker = q?.['1. symbol'];
+          const price = parseFloat(q?.['2. price']);
+          if (ticker && price > 0) prices[ticker] = price;
         }
-        // Small delay between requests
-        if (i < tickers.length - 1) await delay(500);
       }
 
       return {
@@ -64,7 +52,7 @@ exports.handler = async (event) => {
 
     // ── PRECIO CRYPTO ──
     if (type === 'crypto') {
-      const res = await fetchWithTimeout(
+      const res = await fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=eur'
       );
       const data = await res.json();

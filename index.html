@@ -439,18 +439,25 @@ async function fetchEURUSD() {
 
 // ─── FETCH STOCK PRICES ───────────────────────────────────
 async function fetchStockPrices(tickers) {
-  try {
-    const res = await fetch('/.netlify/functions/precios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'stocks', tickers })
-    });
-    const data = await res.json();
-    return data?.prices || {};
-  } catch(e) {
-    console.warn('Stock fetch failed', e);
-    return {};
+  const prices = {};
+  const batchSize = 6;
+
+  // Split into batches of 6 and fetch sequentially
+  for (let i = 0; i < tickers.length; i += batchSize) {
+    const batch = tickers.slice(i, i + batchSize);
+    try {
+      const res = await fetch('/.netlify/functions/precios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'stocks', tickers: batch })
+      });
+      const data = await res.json();
+      Object.assign(prices, data?.prices || {});
+    } catch(e) {
+      console.warn('Stock fetch failed for batch', batch, e);
+    }
   }
+  return prices;
 }
 
 // ─── FETCH CRYPTO PRICES ──────────────────────────────────
